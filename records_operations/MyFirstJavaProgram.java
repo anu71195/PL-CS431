@@ -233,15 +233,6 @@ class with_sync implements Runnable
 		sort_op so = new sort_op();
 		file_op fo=new file_op();
 
-		// readWriteLock.readLock().lock();
-
-		    // multiple readers can enter this section
-		    // if not locked for writing, and not writers waiting
-		    // to lock for writing.
-
-		// readWriteLock.readLock().unlock();
-
-
 		readWriteLock.writeLock().lock();
 		System.out.println(teacher);
 		for(int i=0;i<records.size();i++)	
@@ -295,16 +286,6 @@ class without_sync implements Runnable
 		file_op fo=new file_op();
 		int current_marks,current_roll;
 
-		// readWriteLock.readLock().lock();
-
-		    // multiple readers can enter this section
-		    // if not locked for writing, and not writers waiting
-		    // to lock for writing.
-
-		// readWriteLock.readLock().unlock();
-
-
-		// readWriteLock.writeLock().lock();
 		System.out.println(teacher);
 		for(int i=0;i<records.size();i++)	
 		{
@@ -360,18 +341,7 @@ public class MyFirstJavaProgram
    		
    		all_records=fo.read("t3.txt");
    		pass_records=(Vector<Records>)all_records.clone();
-   // 		for(int i=0;i<pass_records.size();i++)
-   // 		{
-   // 			try
-   // 			{
-	  //  			pass_records.get(i).print_record();
-	  //  		}
-	  //  		catch(IOException e) 
-			// {
-			// 	System.out.println("IOException");
-			// }
-   // 		}
-   // 		// System.out.println();
+
 		s_input="yes";
    		while(s_input.compareTo("yes")==0)
    		{
