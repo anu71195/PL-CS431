@@ -106,7 +106,6 @@ class sort_op
 
 }
 
-
 class Records
 {
 	int roll,marks;
@@ -122,8 +121,6 @@ class Records
 
 	}
 }
-
-
 
 class vec_op
 {
@@ -159,8 +156,15 @@ class user_op
 			BufferedReader reader =  new BufferedReader(new InputStreamReader(System.in));
 			try 
 			{
-				System.out.print("Enter Teacher’s Name: ");
+				System.out.print("Enter Teacher’s Name(CC/TA1/TA2): ");
 				s_input = reader.readLine(); 
+
+				while(s_input.compareTo("CC")!=0 && s_input.compareTo("TA2")!=0 && s_input.compareTo("TA1")!=0)
+				{
+					System.out.println("\nWRONG INPUT!!!!!  TRY AGAIN");
+					System.out.print("Enter Teacher’s Name(CC/TA1/TA2): ");
+					s_input = reader.readLine(); 
+				}
 				output.add(s_input);
 
 				System.out.print("Enter Student Roll number: ");
@@ -170,13 +174,20 @@ class user_op
 			    System.out.println("Update Mark : 1. Increase");
 				System.out.println("              2. Decrease");
 				i_input=Integer.valueOf(reader.readLine());
+				while(i_input!=1 &&i_input!=2)
+				{
+					System.out.println("\nWRONG INPUT!!!!!  TRY AGAIN");
+					System.out.println("Update Mark : 1. Increase");
+					System.out.println("              2. Decrease");
+					i_input=Integer.valueOf(reader.readLine());
+
+				}
 				output.add(i_input);
 				if(i_input==1)
 				{
 					System.out.print("Mark to add: ");
 					i_input=Integer.valueOf(reader.readLine());
 					output.add(i_input);
-
 				}
 				else if(i_input==2)
 				{
@@ -333,17 +344,14 @@ public class MyFirstJavaProgram
    public static void main(String []args) 
    {
    		file_op fo=new file_op();
-		Vector<Records> v = new Vector<Records>(); 
 		Vector<Records>  all_records=new Vector<Records> ();
 		Vector<Records>  pass_records=new Vector<Records> ();//recordsto be passed as the argumentfirst needs to be cloned
 		Vector user_input=new Vector();
-		vec_op vop=new vec_op();
-		user_op uop=new user_op();
-		String filename="t.txt";
-		Records record=new Records();
+		vec_op vo=new vec_op();
+		user_op uo=new user_op();
 		sort_op so = new sort_op();
 		int i_input;
-		String s_input,priority_input;
+		String s_input;
 		BufferedReader reader =  new BufferedReader(new InputStreamReader(System.in));
 		ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 		Map< Integer,Integer> record_flag =  new HashMap< Integer,Integer>(); 
@@ -351,29 +359,50 @@ public class MyFirstJavaProgram
    		////////////////////////////////////////////////////////////////////////////////
    		
    		all_records=fo.read("t3.txt");
-   		System.out.println();
    		pass_records=(Vector<Records>)all_records.clone();
-   		for(int i=0;i<pass_records.size();i++)
-   		{
-   			try
-   			{
-	   			pass_records.get(i).print_record();
-	   		}
-	   		catch(IOException e) 
-			{
-				System.out.println("IOException");
-			}
-   		}
+   // 		for(int i=0;i<pass_records.size();i++)
+   // 		{
+   // 			try
+   // 			{
+	  //  			pass_records.get(i).print_record();
+	  //  		}
+	  //  		catch(IOException e) 
+			// {
+			// 	System.out.println("IOException");
+			// }
+   // 		}
+   // 		// System.out.println();
 		s_input="yes";
    		while(s_input.compareTo("yes")==0)
    		{
-   			user_input=uop.take_input();
+	   		for(int i=0;i<pass_records.size();i++)
+	   		{
+	   			try
+	   			{
+		   			pass_records.get(i).print_record();
+		   		}
+		   		catch(IOException e) 
+				{
+					System.out.println("IOException");
+				}
+	   		}
+	   		System.out.println();
+   			user_input=uo.take_input();
 			System.out.println("Choose one:");
 			System.out.println("1. Without Synchronization");
 			System.out.println("2. With Synchronization");
 			try
 			{
 				i_input=Integer.valueOf(reader.readLine());
+				while(i_input!=1 &&i_input!=2)
+				{
+					System.out.println("\nWRONG INPUT!!!!!  TRY AGAIN");
+					System.out.println("Choose one:");
+					System.out.println("1. Without Synchronization");
+					System.out.println("2. With Synchronization");
+					i_input=Integer.valueOf(reader.readLine());
+
+				}
 				System.out.println();
 				if(i_input==2)
 				{
@@ -418,6 +447,12 @@ public class MyFirstJavaProgram
 			try
 			{
 				s_input=reader.readLine();
+				while(s_input.compareTo("yes")!=0 && s_input.compareTo("no")!=0 )
+				{
+					System.out.println("\nWRONG INPUT!!!!!  TRY AGAIN");
+					System.out.println("Do you want to continue? yes/no");
+					s_input=reader.readLine();
+				}
 				System.out.println();
 			}
 			catch(IOException e) 
