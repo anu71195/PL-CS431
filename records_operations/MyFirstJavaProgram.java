@@ -69,6 +69,7 @@ class file_op
 	        }
 	        return output_v;
 	  }
+	  
 } 
 
 class Sortbyroll implements Comparator<Records> 
@@ -279,24 +280,51 @@ class without_sync implements Runnable
 	@Override
 	public void run()
 	{
+		sort_op so = new sort_op();
+		file_op fo=new file_op();
+		int current_marks,current_roll;
+
+		// readWriteLock.readLock().lock();
+
+		    // multiple readers can enter this section
+		    // if not locked for writing, and not writers waiting
+		    // to lock for writing.
+
+		// readWriteLock.readLock().unlock();
+
+
+		// readWriteLock.writeLock().lock();
 		System.out.println(teacher);
 		for(int i=0;i<records.size();i++)	
 		{
-			if(records.get(i).roll==this.roll)System.out.println("currentmarks "+records.get(i).marks);
-			if(records.get(i).roll==this.roll && (record_flag.get(roll)==null||teacher.compareTo("CC")==0))
+			current_marks=records.get(i).marks;
+			current_roll=records.get(i).roll;
+			if(current_roll==this.roll)System.out.println("currentmarks "+current_marks);
+			if(current_roll==this.roll && (record_flag.get(roll)==null||teacher.compareTo("CC")==0))
 			{
 				if(teacher.compareTo("CC")==0)record_flag.put(roll, new Integer(1)); 
 				if(id_op==1)
 				{
-					records.get(i).marks+=marks_id;
+					records.get(i).marks=current_marks+marks_id;
 				}
 				else if(id_op==2)
 				{
-					records.get(i).marks-=marks_id;
+					records.get(i).marks=current_marks-marks_id;
 				}				
 			}
-			if(records.get(i).roll==this.roll)System.out.println("currentmarks "+records.get(i).marks);
+			if(current_roll==this.roll)System.out.println("currentmarks "+records.get(i).marks);
 		}
+
+		readWriteLock.writeLock().lock();
+		
+		so.sortbyroll(records);
+   		fo.write(records,"records_by_roll.txt");
+   		fo.write(records,"t3.txt");
+   		so.sortbyname(records);
+   		fo.write(records,"records_by_name.txt");
+
+		readWriteLock.writeLock().unlock();
+		
 	}
 }
 
@@ -318,20 +346,12 @@ public class MyFirstJavaProgram
 		String s_input,priority_input;
 		BufferedReader reader =  new BufferedReader(new InputStreamReader(System.in));
 		ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-						Map< Integer,Integer> record_flag =  new HashMap< Integer,Integer>(); 
+		Map< Integer,Integer> record_flag =  new HashMap< Integer,Integer>(); 
 
-					// System.out.println("Set priority? (yes/no)");
-					// priority_input=reader.readLine();
-					// if(priority_input.compareTo("yes")==0)
-					// {
-					// 	System.out.print("thread 1 priority : ");
-					// 	t1_priority=Integer.valueOf(reader.readLine());
-					// 	System.out.print("thread 2 priority : ");
-					// 	t2_priority=Integer.valueOf(reader.readLine());
-					// }
    		////////////////////////////////////////////////////////////////////////////////
    		
    		all_records=fo.read("t3.txt");
+   		System.out.println();
    		pass_records=(Vector<Records>)all_records.clone();
    		for(int i=0;i<pass_records.size();i++)
    		{
@@ -351,18 +371,25 @@ public class MyFirstJavaProgram
 			System.out.println("Choose one:");
 			System.out.println("1. Without Synchronization");
 			System.out.println("2. With Synchronization");
-			// System.out.println(((String)((Vector)user_input.get(0)).get(0)).compareTo("CC"));
-			// if(((String)((Vector)user_input.get(0)).get(0)).compareTo("CC")==0)t1_priority=6;
-			// else if(((String)((Vector)user_input.get(1)).get(0)).compareTo("CC")==0)t2_priority=6;
 			try
 			{
 				i_input=Integer.valueOf(reader.readLine());
+				System.out.println();
 				if(i_input==2)
 				{
 					Thread t1 = new Thread(new with_sync((Vector)user_input.get(0),pass_records,record_flag,readWriteLock), "t1");
 					Thread t2 = new Thread(new with_sync((Vector)user_input.get(1),pass_records,record_flag,readWriteLock), "t2");					
 					t1.start();
 					t2.start();
+					try
+					{
+						t1.join();
+						t2.join();
+					}
+					catch(InterruptedException e)
+					{
+						System.out.println("InterruptedException");
+					}
 				}
 				else if(i_input==1)
 				{
@@ -370,6 +397,15 @@ public class MyFirstJavaProgram
 					Thread t2 = new Thread(new without_sync((Vector)user_input.get(1),pass_records,record_flag,readWriteLock), "t2");
 					t1.start();
 					t2.start();
+					try
+					{
+						t1.join();
+						t2.join();
+					}
+					catch(InterruptedException e)
+					{
+						System.out.println("InterruptedException");
+					}
 				}
 				
 			}
@@ -377,11 +413,12 @@ public class MyFirstJavaProgram
 			{
 				System.out.println("IOException");
 			}
-			System.out.println("Check the output files");
+			System.out.println("\nCheck the output files\n");
 			System.out.println("Do you want to continue? yes/no");
 			try
 			{
 				s_input=reader.readLine();
+				System.out.println();
 			}
 			catch(IOException e) 
 			{
@@ -394,62 +431,3 @@ public class MyFirstJavaProgram
    		
 
 }
-
-
-
-
-
-
-// The class demonstrates how to get an exclusive file lock that prevents other threads and processes / JVMs from
-// obtaining a lock on the same file. To do this, you need to synchronize a block on a file and acquire FileLock. See
-// comments below for more details. Run this class in multiple JVMs and see each thread of each JVM acquires a lock in
-// an orderly fasion.
-// public class FileLocking extends Thread
-// {
-//     private static final File file = new File("lock.test");
-    
-//     public static void main(String[] args) throws Exception
-//     {
-//         for (int i = 0; i < 5; i++) {
-//             new FileLocking().start();
-//         }
-//     }
-
-//     @Override
-//     public void run()
-//     {
-//         // synchronized on a static variable "file" so that threads don't try to acquire a lock on it at the same
-//         // time. Javadoc of FileLock states "File locks are held on behalf of the entire Java virtual machine. They are
-//         // not suitable for controlling access to a file by multiple threads within the same virtual machine." What this
-//         // actually means is that if two threads tries to get a lock on the same file, one fails with
-//         // OverlappingFileLockException instead of waiting for a release of the lock.
-//         synchronized(file) {
-//             FileOutputStream fos = null;
-//             try {
-//                 fos = new FileOutputStream(file);
-
-//                 // Synchronization doesn't have any effect on threads running on a different JVM, of
-//                 // course. FileChannel.lock() acquires a lock on a file that prevents another process from getting a
-//                 // lock on it. The method waits until a lock is released if the lock is held by a different process, as
-//                 // opposed to throwing exception when the lock is held by a thread in the same JVM.
-//                 FileLock lock = fos.getChannel().lock();
-//                 System.out.println("Got a lock in " + getName());
-
-//                 // do some file write operation
-
-//                 sleep(1000);
-//                 fos.close();
-//             } catch (Exception e) {
-//                 e.printStackTrace();
-//             } finally {
-//                 if (fos != null) {
-//                     try {
-//                         fos.close();
-//                     } catch (IOException ex) {
-//                     }
-//                 }
-//             }
-//         }
-//     }
-            
-// }
