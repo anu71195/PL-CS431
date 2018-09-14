@@ -136,7 +136,7 @@ class Records
 {
 	int roll,marks;
 	String name,email,teacher;
-	void print_record()
+	void print_record()throws IOException
 	{
 		System.out.println(roll);
 		System.out.println(name);
@@ -149,8 +149,95 @@ class Records
 
 
 
+class vec_op
+{
+	void print_vector(Vector  input)
+	{
+		for(int i=0;i<input.size();i++)
+		{
+			System.out.println(input.get(i));
+		}
+		System.out.println("\n");
+	}
+	Vector initialize_zeros(int n)
+	{
+		Vector output=new Vector();
+		for(int i=0;i<n;i++)
+		{
+			output.add(0);
+		}
+		return output;
+	}
+}
+class user_op
+{
+	Vector take_input()
+	{
+		
+		Vector all_output=new Vector();
+		int i_input;
+		String s_input;
+		for(int j=0;j<2;j++)
+		{
+			Vector output=new Vector();
+			BufferedReader reader =  new BufferedReader(new InputStreamReader(System.in));
+			try 
+			{
+				System.out.print("Enter Teacher’s Name: ");
+				s_input = reader.readLine(); 
+				output.add(s_input);
 
+				System.out.print("Enter Student Roll number: ");
+				i_input=Integer.valueOf(reader.readLine());
+				output.add(i_input);
 
+			    System.out.println("Update Mark : 1. Increase");
+				System.out.println("              2. Decrease");
+				i_input=Integer.valueOf(reader.readLine());
+				output.add(i_input);
+				if(i_input==1)
+				{
+					System.out.print("Mark to add: ");
+					i_input=Integer.valueOf(reader.readLine());
+					output.add(i_input);
+
+				}
+				else if(i_input==2)
+				{
+					System.out.print("Mark to deduct: ");
+					i_input=Integer.valueOf(reader.readLine());
+					output.add(i_input);
+				}
+			 }
+			catch(IOException e) 
+			{
+	    // Code to handle an IOException here
+			 }
+			 all_output.add(output);
+		}
+		return all_output;
+
+	}
+}
+class data_handling
+{
+	void run(int syn_val,Vector <Records> pass_records,Vector user_input)
+	{
+		vec_op vop=new vec_op();
+		if(syn_val==1)without_sync(pass_records,user_input);
+		else if(syn_val==2)with_sync(pass_records,user_input);
+		record_flag=vop.initialize_zeros(all_records.size());
+	}
+
+	void without_sync(Vector<Records> pass_records,Vector user_input)
+	{
+
+	}
+	void with_sync(Vector<Records> pass_records,Vector user_input)
+	{
+
+	}
+}
 public class MyFirstJavaProgram 
 {
    public static void main(String []args) 
@@ -158,9 +245,18 @@ public class MyFirstJavaProgram
    		file_op fwe=new file_op();
 		Vector<Records> v = new Vector<Records>(); 
 		Vector<Records>  all_records=new Vector<Records> ();
+		Vector<Records>  pass_records=new Vector<Records> ();//recordsto be passed as the argumentfirst needs to be cloned
+		Vector user_input=new Vector();
+		vec_op vop=new vec_op();
+		user_op uop=new user_op();
+		Vector record_flag=new Vector();
 		String filename="t.txt";
 		Records record=new Records();
 		sort_op so = new sort_op();
+		int i_input;
+		String s_input;
+		BufferedReader reader =  new BufferedReader(new InputStreamReader(System.in));
+		data_handling dh=new data_handling();
 
 		// record.roll=150101010;
 		// record.marks=7;
@@ -177,11 +273,48 @@ public class MyFirstJavaProgram
   //  		all_records=fwe.read(filename);
   //  		fwe.append(all_records,filename);
   //  		all_records.get(0).print_record();
-   		all_records=fwe.read("t2.txt");
+   		all_records=fwe.read("t3.txt");
    		System.out.println(all_records.size());
-
    		so.sortbyroll(all_records);
    		so.sortbyname(all_records);
+
+
+
+   		////////////////////////////////////
+   		
+   		
+   		System.out.println(record_flag.size());
+   		vop.print_vector(record_flag);
+   		user_input=uop.take_input();
+   		System.out.println(user_input);
+		s_input="yes";
+   		while(s_input.compareTo("yes")==0)
+   		{
+			System.out.println("Choose one:");
+			System.out.println("1. Without Synchronization");
+			System.out.println("2. With Synchronization");
+			try
+			{
+				i_input=Integer.valueOf(reader.readLine());
+				pass_records=(Vector<Records>)all_records.clone();
+				dh.run(i_input,pass_records,user_input);
+			}
+			catch(IOException e) 
+			{
+
+			}
+			System.out.println("Check the output files");
+			System.out.println("Do you want to continue? yes/no");
+			try
+			{
+				s_input=reader.readLine();
+			}
+			catch(IOException e) 
+			{
+
+			}
+		}
+
 
    }
 }
