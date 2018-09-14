@@ -1,23 +1,21 @@
 import java.net.*; 
 import java.io.*; 
-public class Sys2Sock implements Runnable{
+
+public class Sock2Sys implements Runnable{
     private final Socket socket; 
     private final DataInputStream  in; 
-    private final DataOutputStream out; 
-    Sys2Sock(Socket socket ,DataInputStream  in ,DataOutputStream out){
+    Sock2Sys(Socket socket ,DataInputStream  in){
         this.socket=socket;
         this.in=in;
-        this.out=out;
     }
     public void run(){
         // string to read message from in 
         String line = ""; 
-        // keep reading until "Over" is in 
-        while (!line.equals("Over")) 
+        while (true) 
         { 
             try {
-                line = in.readLine(); 
-                out.writeUTF(line); 
+                line = in.readUTF(); 
+                System.out.println(line); 
                 // out.flush();
             } 
             catch(SocketException i) {
@@ -28,6 +26,15 @@ public class Sys2Sock implements Runnable{
                 break;
             }
         } 
-        System.out.println("Disconnected");         
+        // close the connection 
+        // try
+        // { 
+        //     in.close(); 
+        //     socket.close(); 
+        // } 
+        // catch(IOException i) 
+        // { 
+        //     System.out.println("IOEr: "+i); 
+        // } 
     }
-} 
+}
