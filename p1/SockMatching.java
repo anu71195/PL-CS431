@@ -121,7 +121,7 @@ class ShelfManager implements Runnable {
             try{
                 sortPair();
             } catch (InterruptedException ex) {
-                Logger.getLogger(MatchingMachine.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ShelfManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -183,16 +183,19 @@ class MatchingMachine implements Runnable {
                         log("Waiting done.");
                     }
                     i= (Integer) sharedQueue.remove(0);
+                    counts[i]++;
+                    log("Picked up " + G.Colors[i]+ " Sock from Tray");
+                    System.out.print("\n\t\t Colors: ");
+                    for (int j=0;j<counts.length;j++) 
+                        System.out.print(G.Colors[j]+": "+counts[j]+", ");
+                    System.out.print("\n\n");
                     /*
                     Matching algo here
                     */
-                    if(counts[i]==1){
+                    if(counts[i]==2){
                         counts[i]=0;
                         sendMatched(i);
                     }
-                    else 
-                        counts[i]=1;
-                    log("Picked up " + G.Colors[i]+ " Sock from Tray");
                     Thread.sleep(THINK_TIME);
                     // notifies at end of this block
                     sharedQueue.notifyAll();
