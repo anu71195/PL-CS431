@@ -1,5 +1,6 @@
 import java.io.*;  
 import java.util.*; 
+import java.lang.*; 
 class file_op 
 {  
 
@@ -37,7 +38,6 @@ class file_op
 	  {
 	        String line = null;
 	        Vector<Records> output_v = new Vector<Records>(); 
-	        Records record=new Records();
 	        try 
 	        {
 	            FileReader fileReader = new FileReader(filename);
@@ -45,14 +45,19 @@ class file_op
 	            while((line = bufferedReader.readLine()) != null) 
 	            {
 	                String[] arrOfStr=line.split(",");
+
+			        Records record=new Records();
 	                record.roll=Integer.valueOf(arrOfStr[0]);
 					record.marks=Integer.parseInt(arrOfStr[3]);
 					record.name=arrOfStr[1];
 					record.email=arrOfStr[2];
 					record.teacher=arrOfStr[4];
 	                output_v.add(record);
+
+
 	            }   
-	            bufferedReader.close();         
+	            bufferedReader.close();    
+
 	        }
 	        catch(FileNotFoundException ex) 
 	        {
@@ -65,6 +70,67 @@ class file_op
 	        return output_v;
 	  }
 } 
+
+class Sortbyroll implements Comparator<Records> 
+{ 
+    // Used for sorting in ascending order of 
+    // roll number 
+    public int compare(Records a, Records b) 
+    { 
+        return a.roll - b.roll; 
+    } 
+} 
+class Sortbyname implements Comparator<Records> 
+{ 
+    // Used for sorting in ascending order of 
+    // roll number 
+    public int compare(Records a, Records b) 
+    { 
+        return a.name.compareTo(b.name); 
+    } 
+} 
+  
+
+
+class sort_op
+{
+	 
+	
+	void sortbyroll(Vector<Records> input_v)
+	{
+		for(int i=0;i<input_v.size();i++)
+		{
+			System.out.println(input_v.get(i).roll);
+		 
+		}
+		System.out.println("\n");
+		Collections.sort(input_v,new Sortbyroll());
+				for(int i=0;i<input_v.size();i++)
+		{
+			System.out.println(input_v.get(i).roll);
+		 
+		}
+
+	}
+	void sortbyname(Vector<Records> input_v)
+	{
+		for(int i=0;i<input_v.size();i++)
+		{
+			System.out.println(input_v.get(i).name);
+		 
+		}
+		System.out.println("\n");
+		Collections.sort(input_v,new Sortbyname());
+				for(int i=0;i<input_v.size();i++)
+		{
+			System.out.println(input_v.get(i).name);
+		 
+		}
+
+	}
+
+}
+
 
 class Records
 {
@@ -94,21 +160,28 @@ public class MyFirstJavaProgram
 		Vector<Records>  all_records=new Vector<Records> ();
 		String filename="t.txt";
 		Records record=new Records();
+		sort_op so = new sort_op();
 
-		record.roll=150101010;
-		record.marks=7;
-		record.name="Anurag Ramteke";
-		record.email="anurag.ramteke@iitg.ernet.in";
-		record.teacher="ta1";
+		// record.roll=150101010;
+		// record.marks=7;
+		// record.name="Anurag Ramteke";
+		// record.email="anurag.ramteke@iitg.ernet.in";
+		// record.teacher="ta1";
 
-		v.add(record);
+		// v.add(record);
 
-   		fwe.write(v,filename);
-   		fwe.write(v,filename);
-   		fwe.append(v,filename);
+  //  		fwe.write(v,filename);
+  //  		fwe.write(v,filename);
+  //  		fwe.append(v,filename);
 
-   		all_records=fwe.read(filename);
-   		fwe.append(all_records,filename);
-   		all_records.get(0).print_record();
+  //  		all_records=fwe.read(filename);
+  //  		fwe.append(all_records,filename);
+  //  		all_records.get(0).print_record();
+   		all_records=fwe.read("t2.txt");
+   		System.out.println(all_records.size());
+
+   		so.sortbyroll(all_records);
+   		so.sortbyname(all_records);
+
    }
 }
