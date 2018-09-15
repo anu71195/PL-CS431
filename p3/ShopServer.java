@@ -16,7 +16,7 @@ class TeaMachine implements Runnable {
     public void run(){
         while(true){
             try{
-                Thread.sleep(G.PREP_TIME*1000);
+                Thread.sleep(G.PREP_TIME*G.MINUTE_DURN*1000);
             // }
             // catch(InterruptedException ex){
             //     Logger.getLogger(TeaMachine.class.getName()).log(Level.SEVERE, null, ex);
@@ -24,11 +24,32 @@ class TeaMachine implements Runnable {
             // try{
                 G.teaSema.acquire();
                 if(G.teaCounter>0)G.teaCounter--;
-                G.println("TeaMachine: Pending Tea/Coffees: "+G.teaCounter);
+                G.println("Pending Teas: "+G.teaCounter);
                 G.teaSema.release();
             }
             catch(InterruptedException ex){
                 Logger.getLogger(TeaMachine.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+}
+class CoffeeMachine implements Runnable {
+    public void run(){
+        while(true){
+            try{
+                Thread.sleep(G.PREP_TIME*G.MINUTE_DURN*1000);
+            // }
+            // catch(InterruptedException ex){
+            //     Logger.getLogger(TeaMachine.class.getName()).log(Level.SEVERE, null, ex);
+            // }
+            // try{
+                G.coffeeSema.acquire();
+                if(G.coffeeCounter>0)G.coffeeCounter--;
+                G.println("Pending Coffees: "+G.coffeeCounter);
+                G.coffeeSema.release();
+            }
+            catch(InterruptedException ex){
+                Logger.getLogger(CoffeeMachine.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -73,16 +94,17 @@ public class ShopServer implements Runnable
             while(true)
             {
                 Socket socket = server.accept();
-                // update cust name from input
-                customers.add(new Customer("C"+cust_count));
-         //TODO: make this THREAD SAFE?
+                //Vector is Thread safe - _/TODO: make this THREAD SAFE
+                customers.add(new Customer("C"+cust_count,"A"+cust_count));
                 Customer curr_cust = customers.get(cust_count-1);
                 cust_count++;
                 Thread a = new Thread(new CustService(items,socket,curr_cust), curr_cust.name);
                 a.start();   
             } 
         } catch(IOException  i){
-            System.out.println(i); 
+            System.out.println(i);
+            System.out.println("Server exiting");
+            System.exit(0); 
         } 
     }    
     public void printPurchaseList(){
@@ -125,7 +147,9 @@ public class ShopServer implements Runnable
         Thread ss = new Thread(shopServer,"ShopServer"); 
         ss.start();
         Thread tm = new Thread(new TeaMachine(),"TeaMachine"); 
+        Thread cm = new Thread(new CoffeeMachine(),"CoffeeMachine"); 
         tm.start();
+        cm.start();
 
         int menuChoice,start,end;
         while(true){

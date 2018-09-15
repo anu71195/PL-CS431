@@ -9,16 +9,19 @@ public class G{
     public final static long start_time=time();
     public final static int T_PRICE=10,
     O_PRICE=20,
-    O_QUANT=20,
+    O_QUANT=100,
     O_THR=10,
-    PREP_TIME=60, //seconds
-    DLRY_TIME=120;
+    MINUTE_DURN=5, //seconds
+    PREP_TIME=1, //*MINUTE_DURN
+    DLRY_TIME=2;
     /*
     static means exist without instantiation!
     */
     // For prep time calculation
     public static Semaphore teaSema = new Semaphore(1);
     public static int teaCounter = 0;
+    public static Semaphore coffeeSema = new Semaphore(1);
+    public static int coffeeCounter = 0;
 
     public final static EnumMap<Itemtype, Integer> Prices = new EnumMap<Itemtype, Integer>(Itemtype.class);    
     public final static Itemtype itemtypes[]= Itemtype.values();
@@ -27,6 +30,9 @@ public class G{
     public static long time(){
         return System.currentTimeMillis();
     }
+    // public static void printt(String msg){
+    //     System.out.println(Thread.currentThread().getName()+": "+msg);
+    // }
     public static void println(String msg){
         System.out.println(msg);
     }

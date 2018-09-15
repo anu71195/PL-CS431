@@ -42,9 +42,10 @@ class CustService implements Runnable {
             { 
                 line = in.readUTF(); 
                 if(line.startsWith("set")){
-                    G.print("Customer "+curr_cust.name+" changed name to ");
+                    G.print("Customer "+curr_cust.name+" changed details to ");
                     curr_cust.name=line.split(" ")[1];
-                    G.println(curr_cust.name);
+                    curr_cust.address=line.split(" ")[2];
+                    G.println(curr_cust.name+" at "+curr_cust.address);
                     sendName();
                     continue;
                 }
@@ -93,16 +94,21 @@ public void sendName(){
 }
 public void sendOrder(Order o){    
     try{
-        out.writeUTF(Order.header+o.get_receipt()+"\n\tExpected delivery: "+(o.exp_delivery)+" minutes."); 
+        out.writeUTF(Order.header+o.get_receipt()+"\n\tExpected delivery: "+(o.exp_delivery/G.MINUTE_DURN)+" minutes."); 
     }
     catch(IOException ex){
         System.out.println("IOer: "+ex);
     }
 }
 public void sendOrders(){    
-    String reply=Order.header;
-    for(Order o : curr_cust.orders){
-        reply+=o.get_receipt();
+    String reply;
+    if(curr_cust.orders.size()==0){
+        reply="Nothing ordered yet!";
+    }
+    else{
+        reply=Order.header;
+        for(Order o : curr_cust.orders)
+            reply+=o.get_receipt();
     }
     try{
         out.writeUTF(reply); 
