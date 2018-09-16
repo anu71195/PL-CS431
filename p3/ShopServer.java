@@ -12,19 +12,17 @@ If you want to enforce fairness, the Semaphore class has a constructor that take
     // Semaphore's arg true ensures FCFS
 
 */
+
 class TeaMachine implements Runnable {
     public void run(){
         while(true){
             try{
                 Thread.sleep(G.PREP_TIME*G.MINUTE_DURN*1000);
-            // }
-            // catch(InterruptedException ex){
-            //     Logger.getLogger(TeaMachine.class.getName()).log(Level.SEVERE, null, ex);
-            // }
-            // try{
                 G.teaSema.acquire();
-                if(G.teaCounter>0)G.teaCounter--;
-                G.println("Pending Teas: "+G.teaCounter);
+                if(G.teaCounter>0){
+                    G.teaCounter--;
+                    G.println_t("Prepared One Tea. Pending Teas: "+G.teaCounter);
+                }
                 G.teaSema.release();
             }
             catch(InterruptedException ex){
@@ -38,14 +36,11 @@ class CoffeeMachine implements Runnable {
         while(true){
             try{
                 Thread.sleep(G.PREP_TIME*G.MINUTE_DURN*1000);
-            // }
-            // catch(InterruptedException ex){
-            //     Logger.getLogger(TeaMachine.class.getName()).log(Level.SEVERE, null, ex);
-            // }
-            // try{
                 G.coffeeSema.acquire();
-                if(G.coffeeCounter>0)G.coffeeCounter--;
-                G.println("Pending Coffees: "+G.coffeeCounter);
+                if(G.coffeeCounter>0){
+                    G.coffeeCounter--;
+                    G.println_t("Prepared One Coffee. Pending Coffees: "+G.coffeeCounter);
+                }
                 G.coffeeSema.release();
             }
             catch(InterruptedException ex){
@@ -61,44 +56,40 @@ public class ShopServer implements Runnable
     private int cust_count  =   1,day_number=0,port;
     private static Scanner in = new Scanner(System.in);
     public final Vector<Integer> dailySales;
-    public final Vector<Item> items;
     public final Vector<Customer> customers;
-
     // constructor with port 
     public ShopServer(int port){
         this.port = port;
-
         // starts server and waits for a connection 
         dailySales = new Vector<Integer>();
-        items = new Vector<Item>();        
-        customers = new Vector<Customer>();        
-
+        G.items = new Vector<Item>();        
     // Initialize item prices and stock quantities
-        for(Itemtype it : G.itemtypes){
+        for(Itemtype it : Itemtype.values()){
             if(it == Itemtype.TEA || it == Itemtype.COFFEE){
                 G.Prices.put(it,G.T_PRICE);
-                items.add(new Item(it,-1, -1,G.Prices.get(it),new Semaphore(1,true)));
+                G.items.add(new Item(it,-1, -1,G.Prices.get(it),new Semaphore(1,true)));
             }
             else{
                 G.Prices.put(it,G.O_PRICE);
-                items.add(new Item(it,G.O_QUANT, G.O_THR, G.Prices.get(it),new Semaphore(1,true)));
+                G.items.add(new Item(it,G.O_QUANT, G.O_THR, G.Prices.get(it),new Semaphore(1,true)));
             }
-        }     
+        }
+        customers = new Vector<Customer>();             
     }  
 
     public void run(){
         try{
             server = new ServerSocket(port); 
-            System.out.println("ShopServer started"); 
+            G.println_t("ShopServer started"); 
             System.out.println("Waiting for a client ..."); 
             while(true)
             {
                 Socket socket = server.accept();
                 //Vector is Thread safe - _/TODO: make this THREAD SAFE
-                customers.add(new Customer("C"+cust_count,"A"+cust_count));
+                customers.add(new Customer(socket,"C"+cust_count,"A"+cust_count));
                 Customer curr_cust = customers.get(cust_count-1);
                 cust_count++;
-                Thread a = new Thread(new CustService(items,socket,curr_cust), curr_cust.name);
+                Thread a = new Thread(curr_cust, curr_cust.name);
                 a.start();   
             } 
         } catch(IOException  i){
@@ -108,28 +99,33 @@ public class ShopServer implements Runnable
         } 
     }    
     public void printPurchaseList(){
-        for(Item i : items){
+        G.println("Purchase list:");
+        for(Item i : G.items){
             if(i.to_purchase)
-                G.println(i.type+" "+i.quantity);
+                G.println(i.type+" : "+i.quantity);
         }
-
+        G.println("");
     }    
     public void printOrders(){    
-        G.println("");
+        G.println("Order receipts: ");
         for(Customer c : this.customers){
             for(Order o : c.orders){
                 G.print(Order.header);
                 G.println(o.get_receipt());
             }                
         }                
+        G.println("");
     }
 
     public void printDayWiseStats(int start, int end){
+        G.println("Day wise stats: ");
         Vector<Vector<String> > receipts = new Vector<Vector<String> >(end-start+1);
-        G.println("");
+        for (int i=0;i<end-start+1;i++) {
+            receipts.add(new Vector<String>());
+        }
         for(Customer c : this.customers){
             for(Order o : c.orders){
-                if(o.sold_day>=start && o.sold_day<=end)
+                if(!o.rejected && o.sold_day>=start && o.sold_day<=end)
                     receipts.get(o.sold_day).add(o.get_receipt());
             }                
         }                    
@@ -139,15 +135,17 @@ public class ShopServer implements Runnable
             for(String r : rs){
                 G.println(r);
             }
+            start++;
         }
-    }
+        G.println("");
+	    }
     public static void main(String args[]) 
     { 
         ShopServer shopServer = new ShopServer(5000);
         Thread ss = new Thread(shopServer,"ShopServer"); 
-        ss.start();
         Thread tm = new Thread(new TeaMachine(),"TeaMachine"); 
         Thread cm = new Thread(new CoffeeMachine(),"CoffeeMachine"); 
+        ss.start();
         tm.start();
         cm.start();
 
@@ -172,7 +170,7 @@ public class ShopServer implements Runnable
                 break;
                 case 3:
                 G.day_number++;
-                G.println("Now at date: "+G.timestamp());
+                G.println("Date value updated to: "+G.timestamp());
                 break;
                 case 4:
                 shopServer.printPurchaseList();

@@ -1,6 +1,10 @@
 import java.util.concurrent.Semaphore; 
 import java.util.Vector; 
 
+enum Itemtype 
+{ 
+    TEA ,COFFEE, COOKIES, SNACKS
+};
 public class Item {
     //reference
     public final Itemtype type;
@@ -14,6 +18,6 @@ public class Item {
         this.rate=rate;
         this.threshold=threshold;
         this.quantity=quantity;
-        this.to_purchase=false;
+        this.to_purchase=false;        
     } 
 }

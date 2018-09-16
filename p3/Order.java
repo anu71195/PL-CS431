@@ -1,6 +1,22 @@
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Vector; 
+
+class Record {
+    // one time definition
+    public final String timestamp;
+    public final int quantity, rate, price;
+    // changables
+    public Item item;
+    Record(String timestamp, Item item, int quantity){
+        this.timestamp=timestamp;
+        // this.t_ms=G.time();
+        this.item=item;
+        this.rate=item.rate;
+        this.quantity=quantity;
+        this.price=item.rate*quantity;
+    }
+}
 public class Order {
     // Class variables
     private static int order_count=0;
@@ -28,14 +44,17 @@ public class Order {
         // receipt+=(this.rejected?"Out of stock":("Sold at: "+(this.sold_at-G.start_time)+"ms"))+"\n";
         // receipt+=this.header;
         String sepa=" |\t ";
+        long total_price=0;
         for (Record r : records){
             receipt+= "Order"+this.id+sepa+cust_name+sepa+cust_addr+sepa;
-            receipt+=(this.rejected?"Rejected!":"Sold!")+sepa;
+            receipt+=(this.rejected?"REJECTED!":"SOLD!")+sepa;
             receipt+=r.timestamp+sepa;//(r.t_ms-G.start_time)+"ms,
             receipt+=r.item.type+sepa;
             receipt+=r.rate+sepa+r.quantity+sepa+r.price;
             receipt+="\n";
+            total_price+=r.price;
         }
+        if(!this.rejected)receipt+= "\n\tTotal Cost: "+total_price+"\n";
         return receipt;
     }
     public void add_record(Item item, int quantity){
@@ -53,8 +72,8 @@ public class Order {
         }
         boolean all_avl=true;
         for(Record r : records){
-            if(r.item.quantity>-1 && r.item.quantity - r.quantity < r.item.threshold){
-                if(r.item.quantity>r.quantity){
+            if(r.item.quantity>-1){
+                if(r.item.quantity<r.quantity){
                     all_avl=false;
                     break;
                 }
@@ -76,15 +95,19 @@ public class Order {
                 // Delivery time calc:
                 this.exp_delivery = G.DLRY_TIME;
                 
-                G.teaSema.acquire();
-                G.teaCounter+=teaCount;
-                this.exp_delivery +=  G.PREP_TIME * G.teaCounter;
-                G.teaSema.release();
-                
-                G.coffeeSema.acquire();
-                G.coffeeCounter+=coffeeCount;
-                this.exp_delivery +=  G.PREP_TIME * G.coffeeCounter;
-                G.coffeeSema.release();
+                // add to tea counter only if tea is ordered
+                if(teaCount>0){
+                    G.teaSema.acquire();
+                    G.teaCounter+=teaCount;
+                    this.exp_delivery +=  G.PREP_TIME * G.teaCounter;
+                    G.teaSema.release();
+                }
+                if(coffeeCount>0){
+                    G.coffeeSema.acquire();
+                    G.coffeeCounter+=coffeeCount;
+                    this.exp_delivery +=  G.PREP_TIME * G.coffeeCounter;
+                    G.coffeeSema.release();
+                }
                 
                 this.exp_delivery *= G.MINUTE_DURN;
                 // this.delivered_at = (G.time()-G.start_time)/60000 + exp_delivery;
