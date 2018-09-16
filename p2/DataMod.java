@@ -3,10 +3,10 @@ import java.util.*;
 import java.lang.*; 
 import java.util.concurrent.locks.*;
 
-class file_op 
+class file_op //cass to do file operations
 {  
 
-	void write_m(Vector<Records> input_v,String filename, boolean append)
+	void write_m(Vector<Records> input_v,String filename, boolean append)//write function wwith option of append or not
 	{
 		try
 		{    
@@ -14,24 +14,24 @@ class file_op
 			for(int i=0;i<input_v.size();i++)
 			{
 				Records current_record=new Records();
-				current_record=input_v.get(i);
-				fw.write(""+current_record.roll+","+current_record.name+","+current_record.email+","+current_record.marks+","+current_record.teacher+"\n");
+				current_record=input_v.get(i);//get the ith record and store it in current record
+				fw.write(""+current_record.roll+","+current_record.name+","+current_record.email+","+current_record.marks+","+current_record.teacher+"\n");//now store the current record in the file
 			}
 			fw.close();    
 		}
 		catch(Exception e){System.out.println(e);}      
 	}
-	void write(Vector<Records> input_v,String filename){
+	void write(Vector<Records> input_v,String filename){//write to the file
 		write_m(input_v,filename,false);	
 	}
-	Vector<Records> read(String filename){
+	Vector<Records> read(String filename){//reading the file
 		String line = null;
 		Vector<Records> output_v = new Vector<Records>(); 
 		try 
 		{
 			FileReader fileReader = new FileReader(filename);
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
-			while((line = bufferedReader.readLine()) != null) 
+			while((line = bufferedReader.readLine()) != null) //tille the pointer reaches the end of the file read the line and store it in the line and storing it in the record
 			{
 				String[] arrOfStr=line.split(",");
 
@@ -43,7 +43,7 @@ class file_op
 				record.teacher=arrOfStr[4];
 				output_v.add(record);
 			}   
-			bufferedReader.close();    
+			bufferedReader.close();    //closing the buffer
 		}
 		catch(FileNotFoundException ex) 
 		{
@@ -75,20 +75,20 @@ class Sortbyname implements Comparator<Records>
 	} 
 } 
 
-class sort_op
+class sort_op//sorting operations
 {
-	void sortbyroll(Vector<Records> input_v)
+	void sortbyroll(Vector<Records> input_v)//sort records by roll
 	{
 		Collections.sort(input_v,new Sortbyroll());
 	}
-	void sortbyname(Vector<Records> input_v)
+	void sortbyname(Vector<Records> input_v)//sort records byname
 	{
 		Collections.sort(input_v,new Sortbyname());
 	}
 
 }
 
-class Records
+class Records//records class
 {
 	int roll,marks;
 	String name,email,teacher;
@@ -110,9 +110,9 @@ class Records
 	}
 }
 
-class vec_op
+class vec_op//vector operations
 {
-	void print_vector(Vector  input)
+	void print_vector(Vector  input)//print vector
 	{
 		for(int i=0;i<input.size();i++)
 		{
@@ -120,7 +120,7 @@ class vec_op
 		}
 		System.out.println("\n");
 	}
-	Vector initialize_zeros(int n)
+	Vector initialize_zeros(int n)//creating the vector with initialized n zeros in it
 	{
 		Vector output=new Vector();
 		for(int i=0;i<n;i++)
@@ -130,7 +130,7 @@ class vec_op
 		return output;
 	}
 }
-class user_op
+class user_op//user operations
 {
 	Vector take_input()
 	{
@@ -138,13 +138,13 @@ class user_op
 		int i_input;
 		String s_input;
 		// At a time take input 2 times
-		for(int j=0;j<2;j++)
+		for(int j=0;j<2;j++)//take input two times for two threads
 		{
 			Vector output=new Vector();
 			BufferedReader reader =  new BufferedReader(new InputStreamReader(System.in));
 			try 
 			{
-				while(true){
+				while(true){//getteacher's name with error handling
 					System.out.print("Enter Teacher's Name(CC/TA1/TA2): ");
 					s_input = reader.readLine(); 
 					if(s_input.compareTo("CC")!=0 && s_input.compareTo("TA2")!=0 && s_input.compareTo("TA1")!=0)
@@ -155,7 +155,7 @@ class user_op
 				output.add(s_input);
 
 				System.out.print("Enter Student Roll number: ");
-				while(true){
+				while(true){//get student rollnumber
 					try{
 						i_input=Integer.valueOf(reader.readLine());
 						break;
@@ -169,7 +169,7 @@ class user_op
 				System.out.println("Update Mark : 1. Increase");
 				System.out.println("              2. Decrease");
 				i_input=Integer.valueOf(reader.readLine());
-				while(i_input!=1 && i_input!=2)
+				while(i_input!=1 && i_input!=2)//get whether the marks be decreased or increased 
 				{
 					System.out.println("\nWRONG INPUT!!!!!  TRY AGAIN");
 					System.out.println("Update Mark : 1. Increase");
@@ -201,7 +201,7 @@ class user_op
 	}
 }
 
-class with_sync implements Runnable
+class with_sync implements Runnable//class that implements threads with sync
 {
 	String teacher;
 	int roll,id_op,marks_id;//id_op increment decrement operation, marks_id marks incrementdecrement
@@ -210,7 +210,7 @@ class with_sync implements Runnable
 	HashMap< Integer,Integer>record_flag;
 	ReadWriteLock recordLock;//fileLock,
 	Vector<ReadWriteLock> recordLocks;
-	public with_sync(Vector input,Vector<Records>  pass_records,HashMap< Integer,Integer> record_flag,Vector<ReadWriteLock> recordLocks)
+	public with_sync(Vector input,Vector<Records>  pass_records,HashMap< Integer,Integer> record_flag,Vector<ReadWriteLock> recordLocks)//constructor intializes the object with these values
 	{
 		this.input=input;
 		this.record_flag=  record_flag;
@@ -223,7 +223,7 @@ class with_sync implements Runnable
 		this.recordLocks=recordLocks;
 	}
 	@Override
-	public void run()
+	public void run()//on the start of the thread
 	{	
 		// System.out.println("("+Thread.currentThread().getName()+") "+teacher+" started..");
 		sort_op so = new sort_op();
@@ -231,25 +231,25 @@ class with_sync implements Runnable
 		int current_marks,current_roll;
 		Random rand = new Random();
 		// For file write safety, required even for without synchronization else system will give error
-		for(int i=0;i<records.size();i++)	
+		for(int i=0;i<records.size();i++)	//for each record
 		{
 			// System.out.println(teacher + ">"+ records.get(i).roll);
-			recordLock=(ReadWriteLock)recordLocks.get(i);
-			recordLock.readLock().lock();
+			recordLock=(ReadWriteLock)recordLocks.get(i);//get the lock for the ith record
+			recordLock.readLock().lock();//read lock
 			current_marks=records.get(i).marks;
 			current_roll=records.get(i).roll;
-			if(current_roll==this.roll){
+			if(current_roll==this.roll){//if the roll number in the database
 				// no write lock here - add random sleep to introduce unevenness
 				try{
-					Thread.sleep(rand.nextInt(100));
+					Thread.sleep(rand.nextInt(100));//sleep randomly between 0 and 100milliseconds
 				}
 				catch(InterruptedException ex){
 					System.out.println(ex);
 				}
 				// System.out.println(teacher + ">"+i+"<"+ records.get(i).roll);
-				if(record_flag.get(roll)==null || teacher.equals("CC"))
+				if(record_flag.get(roll)==null || teacher.equals("CC"))//if the teacher is cc
 				{
-					recordLock.readLock().unlock();
+					recordLock.readLock().unlock();//unlock the readlock
 					// ^ have to unlock before getting write lock to avoid a deadlock: 
 					// more at https://stackoverflow.com/questions/16901640/why-in-reentrantreadandwritelock-the-readlock-should-be-unlocked-before-write
 					
@@ -258,10 +258,10 @@ class with_sync implements Runnable
 					// here other thread might acquire writelock to update marks
 					
 					// also other thread might update record_flag too
-					recordLock.writeLock().lock();
+					recordLock.writeLock().lock();//acquire write lock
 
 					if(teacher.equals("CC")){
-						record_flag.put(roll, new Integer(1)); 
+						record_flag.put(roll, new Integer(1)); //updat the record flag so that now ta1 and ta2 won't be able to updat the same record
 					}
 					
 					if(record_flag.get(roll)==null || teacher.equals("CC")){ // get latest condition again
@@ -275,19 +275,19 @@ class with_sync implements Runnable
 						System.out.println("("+Thread.currentThread().getName()+") "+teacher+": Couldn't Update marks: "+current_marks+" -> "+records.get(i).marks);
 					}
 					// get readlock before leaving writelock! that's smart!
-					recordLock.readLock().lock();
-					recordLock.writeLock().unlock();
+					recordLock.readLock().lock();//get the red lock
+					recordLock.writeLock().unlock();//release write lock
 				}
 				else{
 					System.out.println("("+Thread.currentThread().getName()+") "+teacher+": Couldn't Update marks: "+current_marks+" -> "+records.get(i).marks);
 				}
 			}
-			recordLock.readLock().unlock();
+			recordLock.readLock().unlock();//release read lock
 		}		
 	}
 }
 
-class without_sync implements Runnable
+class without_sync implements Runnable//class that implements threads without sync
 {	
 	String teacher;
 	int roll,id_op,marks_id;//id_op increment decrement operation, marks_id marks incrementdecrement
@@ -295,7 +295,7 @@ class without_sync implements Runnable
 	Vector input;
 	HashMap< Integer,Integer>record_flag;
 	// ReadWriteLock fileLock;
-	public without_sync(Vector input,Vector<Records>  pass_records,HashMap< Integer,Integer> record_flag)
+	public without_sync(Vector input,Vector<Records>  pass_records,HashMap< Integer,Integer> record_flag)//constructor intializes the object with these values
 	{
 		this.input=input;
 		this.record_flag=  record_flag;
@@ -307,31 +307,31 @@ class without_sync implements Runnable
 		// this.fileLock=fileLock;
 	}
 	@Override
-	public void run()
+	public void run()//on the start of the thread
 	{
 		// System.out.println("("+Thread.currentThread().getName()+") "+teacher+" started..");
 		sort_op so = new sort_op();
 		file_op fo=new file_op();
 		int current_marks,current_roll;
 		Random rand = new Random();
-		for(int i=0;i<records.size();i++)	
+		for(int i=0;i<records.size();i++)	//for each record in the database
 		{
-			Records r=records.get(i);
+			Records r=records.get(i);//get ith record 
 			current_marks=r.marks;
 			current_roll=r.roll;
-			if(current_roll==this.roll){
-				if(record_flag.get(roll)==null||teacher.equals("CC"))
+			if(current_roll==this.roll){//check if the roll number given as input is in the database
+				if(record_flag.get(roll)==null||teacher.equals("CC"))//if roll number in database check the teacher priority
 				{
 					// no write lock here
 					try{
-						Thread.sleep(rand.nextInt(100));
+						Thread.sleep(rand.nextInt(100));//randomly sleep betewen 0 to 100 milliseconds
 					}
 					catch(InterruptedException ex){
 						System.out.println(ex);
 					}
-					if(teacher.equals("CC"))
-						record_flag.put(roll, new Integer(1)); 
-					r.marks=current_marks+((id_op==1)?1:-1)*marks_id;
+					if(teacher.equals("CC"))//if teacher is CC
+						record_flag.put(roll, new Integer(1));//update record flag htati snow ta1 and ta2 can't modify this record 
+					r.marks=current_marks+((id_op==1)?1:-1)*marks_id;//update the marks
 					System.out.println("("+Thread.currentThread().getName()+") "+teacher+": Updated marks: "+current_marks+" -> "+records.get(i).marks);
 				}
 				else
@@ -341,10 +341,11 @@ class without_sync implements Runnable
 	}
 }
 
-public class DataMod 
+public class DataMod//main class
 {
-	public static void main(String []args) 
+	public static void main(String []args) //main function
 	{
+		//initializations
 		file_op fo=new file_op();			
 		Vector user_input=new Vector();
 		vec_op vo=new vec_op();
@@ -359,15 +360,15 @@ public class DataMod
 
 			//records to be passed as the argument first needs to be cloned
 		Vector<Records>  all_records=fo.read("studInfo.txt");
-		so.sortbyroll(all_records);
+		so.sortbyroll(all_records);//sort records with respect to roll
 		
 		Vector<ReadWriteLock> recordLocks = new Vector<ReadWriteLock>();
 		for(int i=0; i<all_records.size();i++)
-			recordLocks.add(new ReentrantReadWriteLock());
+			recordLocks.add(new ReentrantReadWriteLock());//making locks for each record
 
    		////////////////////////////////////////////////////////////////////////////////
 
-		Vector<Records>  pass_records;
+		Vector<Records>  pass_records;//records that would be passed as parameters to the functions used subsequently
 		pass_records = new Vector<Records>();
 		for(Records r : all_records){
 			pass_records.add(new Records(r));
@@ -393,7 +394,7 @@ public class DataMod
 
 			System.out.println("\nCurrent flags: "+record_flag);
 			System.out.println("\nCurrent file: ");
-			for(Records r : pass_records)
+			for(Records r : pass_records)//printing all the records
 			{
 				try {r.print_record(); }
 				catch(IOException e) {System.out.println("IOException"); }
@@ -407,8 +408,8 @@ public class DataMod
 			System.out.println("2. With Synchronization");
 			try
 			{
-				i_input=Integer.valueOf(reader.readLine());
-				while(i_input!=1 &&i_input!=2)
+				i_input=Integer.valueOf(reader.readLine());//input forwhether the user needs to run the pgoram with syncronization or without it 1 stands for without sync and 2 for with ysnc
+				while(i_input!=1 &&i_input!=2)//error handling loop if the input for with and without synchronization is not given properly
 				{
 					System.out.println("\nWRONG INPUT!!!!!  TRY AGAIN");
 					System.out.println("Choose one:");
@@ -418,19 +419,19 @@ public class DataMod
 				}
 				System.out.println();
 				Thread t1,t2;
-				if(i_input==1)
+				if(i_input==1)//without synchronization
 				{
-					t1 = new Thread(new without_sync((Vector)user_input.get(0),pass_records,record_flag), "t1");
-					t2 = new Thread(new without_sync((Vector)user_input.get(1),pass_records,record_flag), "t2");
+					t1 = new Thread(new without_sync((Vector)user_input.get(0),pass_records,record_flag), "t1");//initializing thread 1
+					t2 = new Thread(new without_sync((Vector)user_input.get(1),pass_records,record_flag), "t2");//intializing thread 2
 				}
-				else
+				else//with synchronization
 				{
-					t1 = new Thread(new with_sync((Vector)user_input.get(0),pass_records,record_flag,recordLocks), "t1");
-					t2 = new Thread(new with_sync((Vector)user_input.get(1),pass_records,record_flag,recordLocks), "t2");					
+					t1 = new Thread(new with_sync((Vector)user_input.get(0),pass_records,record_flag,recordLocks), "t1");//intializing thread 1
+					t2 = new Thread(new with_sync((Vector)user_input.get(1),pass_records,record_flag,recordLocks), "t2");//intializing thrad 2
 				}				
 				//start threads
-				t1.start();
-				t2.start();
+				t1.start();//start thread 1
+				t2.start();//start thrad 2
 				try
 				{
 					// Join main thread with others i.e. wait for both threads to finish
@@ -450,8 +451,8 @@ public class DataMod
 			System.out.println("\nCheck the output files\n");
 			// fileLock.writeLock().lock(); <- no need
 
-			so.sortbyname(pass_records);
-			fo.write(pass_records,"records_by_name.txt");
+			so.sortbyname(pass_records);//sort the records by name
+			fo.write(pass_records,"Sorted_Name.txt");//store them in the file sorted_name.txt
 			System.out.println("\nSorted by Name\n");
 			for(Records r : pass_records)
 			{
@@ -459,11 +460,11 @@ public class DataMod
 				catch(IOException e) {System.out.println("IOException"); }
 			}
 
-			so.sortbyroll(pass_records);
-			fo.write(pass_records,"records_by_roll.txt");
-			fo.write(pass_records,"studInfo.txt");
+			so.sortbyroll(pass_records);//sort the records by roll
+			fo.write(pass_records,"Sorted_Roll.txt");//store them in sorted_roll.txt
+			fo.write(pass_records,"studInfo.txt");//update the original file with latest values
 			System.out.println("\nSorted by Roll\n");
-			for(Records r : pass_records)
+			for(Records r : pass_records)//print all the records
 			{
 				try {r.print_record(); }
 				catch(IOException e) {System.out.println("IOException"); }
